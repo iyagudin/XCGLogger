@@ -137,7 +137,7 @@ open class FileDestination: BaseQueuedDestination {
 		func close() {
 			self.logFileHandle?.synchronizeFile()
 
-			if #available(iOSApplicationExtension 13.0, *) {
+			if #available(iOS 13.0, *) {
 				try? self.logFileHandle?.close()
 			} else {
 				self.logFileHandle?.closeFile()
