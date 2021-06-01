@@ -134,9 +134,32 @@ open class FileDestination: BaseQueuedDestination {
     /// - Returns:  Nothing
     ///
     private func closeFile() {
-        logFileHandle?.synchronizeFile()
-        logFileHandle?.closeFile()
-        logFileHandle = nil
+		func close() {
+			self.logFileHandle?.synchronizeFile()
+
+			if #available(iOSApplicationExtension 13.0, *) {
+				try? self.logFileHandle?.close()
+			} else {
+				self.logFileHandle?.closeFile()
+			}
+
+			self.logFileHandle = nil
+		}
+
+		if let logQueue = logQueue {
+			let group = DispatchGroup()
+
+			group.enter()
+			logQueue.async {
+				close()
+				group.leave()
+			}
+
+			group.wait()
+		}
+		else {
+			close()
+		}
     }
 
     /// Force any buffered data to be written to the file.
