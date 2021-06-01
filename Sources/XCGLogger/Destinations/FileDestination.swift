@@ -134,31 +134,23 @@ open class FileDestination: BaseQueuedDestination {
     /// - Returns:  Nothing
     ///
     private func closeFile() {
-		func close() {
-			self.logFileHandle?.synchronizeFile()
-
-			if #available(iOS 13.0, *) {
-				try? self.logFileHandle?.close()
-			} else {
-				self.logFileHandle?.closeFile()
-			}
-
-			self.logFileHandle = nil
-		}
-
 		if let logQueue = logQueue {
 			let group = DispatchGroup()
 
 			group.enter()
 			logQueue.async {
-				close()
+				self.logFileHandle?.synchronizeFile()
+				self.logFileHandle?.closeFile()
+				self.logFileHandle = nil
 				group.leave()
 			}
 
 			group.wait()
 		}
 		else {
-			close()
+			self.logFileHandle?.synchronizeFile()
+			self.logFileHandle?.closeFile()
+			self.logFileHandle = nil
 		}
     }
 
